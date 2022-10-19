@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,23 +14,12 @@ public class Main {
             .stream()
             .map(String::toLowerCase)
             .collect(Collectors.toList());
-    ;
     public static final String SEPARATOR = ":";
 
-    public static void main(String[] args) {
-        Main main = new Main();
-        List<String> log = main.filter("data/input1.txt");
-        lineBylineOutput(log);
-        save(log, "data/output1.txt");
-    }
-
-
-    public List<String> filter(String file) {
+    public List<String> reassembleListFromFile(String file) {
         List<String> firstList = new ArrayList<>();
         List<String> secondList = new ArrayList<>();
         List<String> resultList = new ArrayList<>();
-        List<String> leftList = new ArrayList<>();
-        List<String> rightList = new ArrayList<>();
         boolean flag = false;
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             for (String line = in.readLine(); line != null; line = in.readLine()) {
@@ -44,59 +34,24 @@ public class Main {
             e.printStackTrace();
         }
 
-
-//        if (firstList.size() > secondList.size()) {
-//            leftList = firstList;
-//            rightList = secondList;
-//        } else {
-//            leftList = secondList;
-//            rightList = firstList;
-//        }
-//
-//        if (leftList.size() == 1 && rightList.size() == 1) {
-//            resultList.add(leftList.get(0) + SEPARATOR + rightList.get(0));
-//        } else
-//            for (int i = 0; i < leftList.size(); i++) {
-//                boolean matchedIsFinded = false;
-//                String sumLine = "";
-//                Double indexOfSimilarity = 0.0;
-//                for (int j = 0; j < rightList.size(); j++) {
-//                    List<String> listFromTheLeftLine = getlistFromTheLine(leftList, i);
-//                    List<String> listFromTheRightLine = getlistFromTheLine(rightList, j);
-//
-//                    boolean match = isAnyWordMatchedInTwoLists(listFromTheLeftLine, listFromTheRightLine);
-//                    double similarity = findSimilarity(leftList.get(i), rightList.get(j));
-//                    if (match || similarity>0.5) {
-//                        resultList.add(leftList.get(i) + SEPARATOR + rightList.get(j));
-//                        matchedIsFinded = true;
-//                    }
-//                }
-//                if(!matchedIsFinded){
-//                    resultList.add(leftList.get(i) + SEPARATOR + "?");
-//                }
-//            }
-//        return resultList;
-
-
         if (firstList.size() == 1 && secondList.size() == 1) {
             resultList.add(firstList.get(0) + SEPARATOR + secondList.get(0));
         } else {
             List<Integer> usedLinesFromSL = new ArrayList<>();
             for (int i = 0; i < firstList.size(); i++) {
-                boolean matchedIsFinded = false;
+                boolean matchedIsFound = false;
                 for (int j = 0; j < secondList.size(); j++) {
-                    List<String> listFromTheLeftLine = getlistFromTheLine(firstList, i);
-                    List<String> listFromTheRightLine = getlistFromTheLine(secondList, j);
+                    List<String> listFromTheLeftLine = getListFromTheLine(firstList, i);
+                    List<String> listFromTheRightLine = getListFromTheLine(secondList, j);
 
                     boolean match = isAnyWordMatchedInTwoLists(listFromTheLeftLine, listFromTheRightLine);
-                    double indexOfSimilarity = findSimilarity(firstList.get(i), secondList.get(j));
-                    if (match || indexOfSimilarity > 0.8) {
+                    if (match) {
                         resultList.add(firstList.get(i) + SEPARATOR + secondList.get(j));
-                        matchedIsFinded = true;
+                        matchedIsFound = true;
                         usedLinesFromSL.add(j);
                     }
                 }
-                if (!matchedIsFinded) {
+                if (!matchedIsFound) {
                     resultList.add(firstList.get(i) + SEPARATOR + "?");
                 }
             }
@@ -109,12 +64,11 @@ public class Main {
         return resultList;
     }
 
-
     private boolean isAnyWordMatchedInTwoLists(List<String> listFromTheLeftLine, List<String> listFromTheRightLine) {
-        Boolean match = false;
+        boolean match = false;
         for (String wordFromLL : listFromTheLeftLine) {
             for (String wordFromRL : listFromTheRightLine) {
-                if (wordFromLL.equals(wordFromRL)) {
+                if (wordFromLL.equals(wordFromRL) || findSimilarity(wordFromLL, wordFromRL) > 0.8) {
                     match = true;
                 }
             }
@@ -122,7 +76,7 @@ public class Main {
         return match;
     }
 
-    private List<String> getlistFromTheLine(List<String> list, int i) {
+    private List<String> getListFromTheLine(List<String> list, int i) {
         return Arrays.stream(list.get(i).split(" "))
                 .filter(word -> !pretextList.contains(word))
                 .collect(Collectors.toList());
@@ -138,13 +92,9 @@ public class Main {
         return sublist;
     }
 
-    public static void lineBylineOutput(List<String> list) {
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
-        }
-    }
-
     public static double findSimilarity(String x, String y) {
+        x = x.toLowerCase(Locale.ROOT);
+        y = y.toLowerCase(Locale.ROOT);
         if (x == null && y == null) {
             return 1.0;
         }
@@ -155,7 +105,7 @@ public class Main {
     }
 
     public static boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
+        return str.matches("-?\\d+(\\.\\d+)?");
     }
 
     public static List<String> getLineListFromFile(String file) {
@@ -170,16 +120,22 @@ public class Main {
         return lineList;
     }
 
-    public static void save(List<String> log, String file) {
+    public static void saveListToFile(List<String> log, String file) {
         try (PrintWriter out = new PrintWriter(
                 new BufferedOutputStream(
                         new FileOutputStream(file)
                 ))) {
-            for (int i = 0; i < log.size(); i++) {
-                out.println(log.get(i));
+            for (String s : log) {
+                out.println(s);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        Main main = new Main();
+        List<String> reassembledList = main.reassembleListFromFile("data/input1.txt");
+        saveListToFile(reassembledList, "data/output1.txt");
     }
 }
