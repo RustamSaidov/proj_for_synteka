@@ -1,39 +1,40 @@
 package ru.synteka;
 
 import org.junit.Test;
+import ru.synteka.utils.ListFromFile;
+
 import java.util.List;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static ru.synteka.utils.FileOperations.getLineListFromFile;
+import static ru.synteka.utils.FileOperations.saveListToFile;
 
 public class MainTest {
 
     @Test
     public void testMain1() {
-        Main main = new Main();
-        List<String> expect = List.of("гвоздь:?",
-                "шуруп:шуруп 3х1.5",
-                "краска синяя:краска",
-                "ведро для воды:корыто для воды");
-        Main.saveListToFile(main.reassembleListFromFile("data/input1.txt"), "data/output1.txt");
-        List<String> result = Main.getLineListFromFile("data/output1.txt");
+        List<String> expect = List.of("РіРІРѕР·РґСЊ:?",
+                "С€СѓСЂСѓРї:С€СѓСЂСѓРї 3С…1.5",
+                "РєСЂР°СЃРєР° СЃРёРЅСЏСЏ:РєСЂР°СЃРєР°",
+                "РІРµРґСЂРѕ РґР»СЏ РІРѕРґС‹:РєРѕСЂС‹С‚Рѕ РґР»СЏ РІРѕРґС‹");
+        saveListToFile(new ListFromFile().reassemble("data/input1.txt"), "data/output1.txt");
+        List<String> result = getLineListFromFile("data/output1.txt");
         assertEquals(expect, result);
     }
 
     @Test
     public void testMain2() {
-        Main main = new Main();
-        List<String> expect = List.of("Бетон с присадкой:Цемент");
-        Main.saveListToFile(main.reassembleListFromFile("data/input2.txt"), "data/output2.txt");
-        List<String> result = Main.getLineListFromFile("data/output2.txt");
+        List<String> expect = List.of("Р‘РµС‚РѕРЅ СЃ РїСЂРёСЃР°РґРєРѕР№:Р¦РµРјРµРЅС‚");
+        saveListToFile(new ListFromFile().reassemble("data/input2.txt"), "data/output2.txt");
+        List<String> result = getLineListFromFile("data/output2.txt");
         assertEquals(expect, result);
     }
 
     @Test
     public void testMain3() {
-        Main main = new Main();
-        List<String> expect = List.of("Бетон с присадкой:присадка для бетона", "доставка:?");
-        Main.saveListToFile(main.reassembleListFromFile("data/input3.txt"), "data/output3.txt");
-        List<String> result = Main.getLineListFromFile("data/output3.txt");
-        result.forEach(System.out::println);
+        List<String> expect = List.of("Р‘РµС‚РѕРЅ СЃ РїСЂРёСЃР°РґРєРѕР№:РїСЂРёСЃР°РґРєР° РґР»СЏ Р±РµС‚РѕРЅР°", "РґРѕСЃС‚Р°РІРєР°:?");
+        saveListToFile(new ListFromFile().reassemble("data/input3.txt"), "data/output3.txt");
+        List<String> result = getLineListFromFile("data/output3.txt");
         assertEquals(expect, result);
     }
 }
